@@ -1,0 +1,1491 @@
+<!--
+ * @Author: your name
+ * @Date: 2020-05-21 10:47:30
+ * @LastEditTime: 2020-06-03 10:09:23
+ * @LastEditors: Please set LastEditors
+ * @Description: In User Settings Edit
+ * @FilePath: /small-shop/Users/lf/Desktop/ydk-project/html-admin/add-scenic-goods.html
+-->
+<!DOCTYPE html>
+<html lang="cn">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>添加产品</title>
+  <link rel="stylesheet" href="__STATIC__/store/css/element-ui.css"></link>
+  <script src="__STATIC__/store/js/vue.min.js"></script>
+  <script src="__STATIC__/store/js/jquery.min.js"></script>
+  <script src="__STATIC__/store/js/element-ui.min.js"></script>
+  <script src="__STATIC__/store/js/axios.min.js"></script>
+  <script src="__STATIC__/store/js/qs.min.js"></script>
+  <script src="__STATIC__/store/layer/layer.js"></script>
+  <script src="__STATIC__/store/js/goods/goods-info-module.js" charset="UTF-8"></script>
+  <script src="__STATIC__/store/js/goods/goods-sales-scheme-module.js" charset="UTF-8"></script>
+  <script src="__STATIC__/store/js/goods/goods-info-money-module.js" charset="UTF-8"></script>
+  <script src="__STATIC__/store/js/goods/goods-info-buy-limit.js" charset="UTF-8"></script>
+  <script src="__STATIC__/store/js/goods/goods-info-enter-module.js" charset="UTF-8"></script>
+  <script src="__STATIC__/store/js/goods/goods-info-verify-module.js" charset="UTF-8"></script>
+  <script src="__STATIC__/store/js/goods/goods-info-refund-module.js" charset="UTF-8"></script>
+  <script src="__STATIC__/store/js/goods/goods-info-sms-module.js" charset="UTF-8"></script>
+  <script src="__STATIC__/store/js/goods/goods-info-up-down-module.js" charset="UTF-8"></script>
+  <script src="__STATIC__/store/js/goods/goods-category.js" charset="UTF-8"></script>
+  <script src="__STATIC__/store/js/goods/goods-seller-info.js" charset="UTF-8"></script>
+  <style>
+    .my-asg-container{
+      padding: 10px;
+      margin: 10px;
+      background-color: #ffffff;
+    }
+    .my-asg-content-wrapper{
+      /* height: 10000px; */
+      width: 90%;
+    }
+    .my-asg-content-wrapper > div{
+      margin-bottom: 10px;
+    }
+    .my-flex-box-wrapper{
+      display: -webkit-box; /* 老版本语法: Safari, iOS, Android browser, older WebKit browsers. */
+      display: -moz-box; /* 老版本语法: Firefox (buggy) */
+      display: -ms-flexbox; /* 混合版本语法: IE 10 */
+      display: -webkit-flex; /* 新版本语法: Chrome 21+ */
+      display: flex; /* 新版本语法: Opera 12.1, Firefox 22+ */
+      -webkit-flex-wrap: nowrap;
+      -ms-flex-wrap: nowrap;
+      flex-wrap: nowrap;
+    }
+    .menu-wrapper{
+      position: fixed;
+      right: 3%;
+      top: 0;
+      bottom: 0;
+      height: 100vh;
+      justify-content: center;
+      align-items: center;
+    }
+    .el-tabs__item{
+      height: calc(100vh * 0.7 / 9);
+      line-height: calc(100vh * 0.7 / 9);
+    }
+    .module-title{
+      color: #333333;
+      font-size: 18px;
+      font-weight: bold;
+    }
+    .sales-title{
+      text-align: center;
+      color: #666;
+      font-size: 14px;
+      font-weight: bold;
+    }
+    .el-tag + .el-tag {
+      margin-left: 10px;
+    }
+    .button-new-tag {
+      margin-left: 10px;
+      height: 32px;
+      line-height: 30px;
+      padding-top: 0;
+      padding-bottom: 0;
+    }
+    .input-new-tag {
+      width: 90px;
+      margin-left: 10px;
+      vertical-align: bottom;
+    }
+    .sub-form-wrapper{
+      background-color: #f5f5f5;
+      padding: 10px;
+      border-radius: 5px;
+    }
+    .my-yx-category-wrapper{
+
+    }
+    .my-yx-image-item-wrapper{
+      width: 100px;
+      height: 100px;
+    }
+    .my-seller-info-content-wrapper{
+      position: relative;
+      width: 70%;
+      margin: 0 auto;
+    }
+    .my-seller-info-content-wrapper .seller-info-item-value {
+      color: #666666;
+      font-weight: bold;
+      font-size: 14px;
+    }
+    .my-seller-info-content-wrapper .seller-info-image-wrapper {
+      width: 30%;
+      position: absolute;
+      right: 20px;
+      top: calc(50% - 100px);
+      text-align: center;
+    }
+    .my-seller-info-content-wrapper .seller-info-image-wrapper .s-image {
+      width: 200px;
+      height: 200px;
+      background-color: #f5f5f5;
+      border-radius: 5px;
+    }
+    .content {
+       padding-left: 0px;
+       padding: 0px; 
+     }
+  </style>
+</head>
+<body>
+  <div id="app" class="my-asg-container">
+    <div class="my-asg-content-wrapper">
+      <div id="01">
+        <el-card>
+          <div slot="header" class="clearfix module-title">
+            <div class="my-flex-box-wrapper" style="justify-content: space-between; align-items: center;">
+              <span>{{menus[0]}}</span>
+              <el-button type="primary" size="small" @click="save1" v-if="debug">保&nbsp;&nbsp;&nbsp;&nbsp;存</el-button>
+            </div>
+          </div>
+          <el-form size="small" label-position="right" label-width="120px">
+            <el-form-item label="商家名称">
+              <el-col :span="10">
+                <el-input v-model="goodsInfoModule.form.sellerName" readonly>
+                </el-input>
+              </el-col>
+            </el-form-item>
+            <el-form-item label="商品名称">
+              <el-col :span="10">
+                <el-input v-model="goodsInfoModule.form.goodsTitle" placeholder="请输入商品名称（必填）"></el-input>
+              </el-col>
+            </el-form-item>
+            <el-form-item label="设备名称">
+              <el-col :span="10">
+                <el-input v-model="goodsInfoModule.form.print_name" placeholder="请输入设备名称"></el-input>
+              </el-col>
+            </el-form-item>
+            <el-form-item label="商品类型">
+              <el-col :span="10">
+                <el-select v-model="goodsInfoModule.form.goodsTypeId" clearable placeholder="请选择" size="small" style="width: 100%;">
+                  <el-option
+                    v-for="item in goodsInfoModule.form.goodsTypeList"
+                    :key="item.goodsTypeId"
+                    :label="item.goodsTypeName"
+                    :value="item.goodsTypeId">
+                  </el-option>
+                </el-select>
+              </el-col>
+            </el-form-item>
+            <el-form-item label="年卡商品">
+              <el-col :span="10">
+                <el-radio-group v-model="goodsInfoModule.form.year_card" size="mini">
+                  <el-radio-button v-for="item in yearCardList" :label="item.value" :key="item.value">{{item.name}}</el-radio-button>
+                </el-radio-group>
+              </el-col>
+            </el-form-item>
+          </el-form>
+        </el-card>
+      </div>
+      <div id="02">
+        <el-card>
+          <div slot="header" class="clearfix module-title">
+            <div class="my-flex-box-wrapper" style="justify-content: space-between; align-items: center;">
+              <span>{{menus[1]}}</span>
+            </div>
+          </div>
+          <el-row :gutter="inputSpanObj.gutter">
+            <el-col :span="inputSpanObj.timeRange">
+              <div class="sales-title">时间范围</div>
+            </el-col>
+            <el-col :span="inputSpanObj.costPrice">
+              <div class="sales-title">成本价格</div>
+            </el-col>
+            <el-col :span="inputSpanObj.salesPrice">
+              <div class="sales-title">销售价格</div>
+            </el-col>
+            <el-col :span="inputSpanObj.retailPrice">
+              <div class="sales-title">门市价格</div>
+            </el-col>
+            <el-col :span="inputSpanObj.dayStock">
+              <div class="sales-title">单日库存</div>
+            </el-col>
+          </el-row>
+          <el-row :gutter="inputSpanObj.gutter" style="margin-top: 10px;">
+            <el-col :span="inputSpanObj.timeRange">
+              <el-date-picker v-model="saleSchemeModule.form.timeRange" style="width: 100%;" type="daterange" size="small" value-format="timestamp" range-separator="至" start-placeholder="开始日期" end-placeholder="结束日期"></el-date-picker>
+            </el-col>
+            <el-col :span="inputSpanObj.costPrice" style="text-align: center;">
+              <el-input-number v-model="saleSchemeModule.form.costPrice" size="small" :precision="2" :step="10" :max="10000" :min="0" style="width: 100%;"></el-input-number>
+            </el-col>
+            <el-col :span="inputSpanObj.salesPrice" style="text-align: center;">
+              <el-input-number v-model="saleSchemeModule.form.salePrice" size="small" :precision="2" :step="10" :max="10000" :min="0" style="width: 100%;"></el-input-number>
+            </el-col>
+            <el-col :span="inputSpanObj.retailPrice" style="text-align: center;">
+              <el-input-number v-model="saleSchemeModule.form.retailPrice" size="small" :precision="2" :step="10" :max="10000" :min="0" style="width: 100%;"></el-input-number>
+            </el-col>
+            <el-col :span="inputSpanObj.dayStock" style="text-align: center;">
+              <el-input-number v-model="saleSchemeModule.form.DayStock" size="small" :step="1" :max="10000000" :min="-2" style="width: 100%;" :disabled="saleSchemeModule.form.is_confirm !== 0"></el-input-number>
+            </el-col>
+          </el-row>
+          <el-row v-if="saleSchemeModule.form.is_confirm === 1" :gutter="inputSpanObj.gutter" style="margin-top: 20px;">
+            <el-col :span="inputSpanObj.costPrice" >
+              <div class="sales-title">免确认库存</div>
+            </el-col>
+            <el-col :span="inputSpanObj.costPrice" >
+              <div class="sales-title">需确认库存</div>
+            </el-col>
+          </el-row>
+          <el-row v-if="saleSchemeModule.form.is_confirm === 1" :gutter="inputSpanObj.gutter" style="margin-top: 10px;">
+            <el-col :span="inputSpanObj.costPrice" style="text-align: center;">
+              <el-input-number v-model="saleSchemeModule.form.stock" size="small" :step="1" :max="10000000" :min="0" style="width: 100%;"></el-input-number>
+            </el-col>
+            <el-col :span="inputSpanObj.costPrice" style="text-align: center;">
+              <el-input-number v-model="saleSchemeModule.form.confirm_stock" size="small" :step="1" :max="10000000" :min="0" style="width: 100%;"></el-input-number>
+            </el-col>
+          </el-row>
+          <el-row :gutter="20" style="margin-top: 40px;">
+            <el-col :span="8">
+              <el-checkbox-group v-model="saleSchemeModule.form.workdayDataTemp">
+                <el-checkbox v-for="item in workdayList" :label="item.value" :key="item.value">{{item.name}}</el-checkbox>
+              </el-checkbox-group>
+            </el-col>
+            <el-col :span="2">
+              <div class="my-flex-box-wrapper" style="justify-content: space-around">
+                <el-link @click="allSelected">全选</el-link>
+                <el-link @click="normalDaySelected">平时</el-link>
+                <el-link @click="weekDaySelected">周末</el-link>
+              </div>
+            </el-col>
+            <el-col :span="3">
+              <div style="text-align: right;">
+                <el-switch
+                  v-model="saleSchemeModule.form.is_interval"
+                  :active-value="1"
+                  :inactive-value="0"
+                  active-text="是否是时段票">
+                </el-switch>
+              </div>
+            </el-col>
+            <el-col :span="3">
+              <div style="text-align: right;">
+                <el-switch
+                  v-model="saleSchemeModule.form.is_confirm"
+                  :active-value="1"
+                  :inactive-value="0"
+                  active-text="启用确认库存">
+                </el-switch>
+              </div>
+            </el-col>
+            <el-col :span="8">
+              <div style="text-align: right;">
+                <el-link type="danger" :underline="false">备注：0:日库存为空,&nbsp;&nbsp;&nbsp;-1:库存无限,&nbsp;&nbsp;&nbsp;-2:停止售卖</el-link>
+              </div>
+            </el-col>
+          </el-row>
+        </el-card>
+      </div>
+      <div id="03">
+        <el-card>
+          <div slot="header" class="clearfix module-title">
+            <div class="my-flex-box-wrapper" style="justify-content: space-between; align-items: center;">
+              <span>{{menus[2]}}</span>
+              <el-button type="primary" size="small" @click="save3" v-if="debug">保&nbsp;&nbsp;&nbsp;&nbsp;存</el-button>
+            </div>
+          </div>
+          <el-form size="small" label-position="right" label-width="120px">
+            <el-form-item label="产品说明">
+              <el-row>
+                <el-col :span="10">
+                  <el-input type="textarea" placeholder="请输入内容" v-model="moneyModule.form.for_people" maxlength="150" :rows="5" show-word-limit>
+                </el-col>
+              </el-row>
+              <el-row>
+                <el-col :span="10">
+                  <el-link :underline="false" type="warning">{{forPeopleText}}</el-link>
+                </el-col>
+              </el-row>
+            </el-form-item>
+            <el-form-item label="费用包含">
+              <el-col :span="10">
+                <el-input v-model="moneyModule.form.feesInclude" placeholder="如：学生票一张（必填）"></el-input>
+              </el-col>
+            </el-form-item>
+            <el-form-item label="费用不含">
+              <el-col :span="10">
+                <el-input v-model="moneyModule.form.feesNotInclude" placeholder="如：景区内的电车，自行二次消费"></el-input>
+              </el-col>
+            </el-form-item>
+            <el-form-item label="发票说明">
+              <el-col :span="10">
+                <el-input v-model="moneyModule.form.invoiceExplain" placeholder="如：商家提供，顺丰到付，项目：旅游服务"></el-input>
+              </el-col>
+            </el-form-item>
+            <el-form-item label="其它说明">
+              <el-col :span="10">
+                <el-input v-model="moneyModule.form.other"  placeholder="其它说明"></el-input>
+              </el-col>
+            </el-form-item>
+          </el-form>
+        </el-card>
+      </div>
+      <div id="04">
+        <el-card>
+          <div slot="header" class="clearfix module-title">
+            <div class="my-flex-box-wrapper" style="justify-content: space-between; align-items: center;">
+              <span>{{menus[3]}}</span>
+              <el-button type="primary" size="small" @click="save4" v-if="debug">保&nbsp;&nbsp;&nbsp;&nbsp;存</el-button>
+            </div>
+          </div>
+          <el-form label-position="right" :model="buyLimitModule.form" label-width="120px">
+            <el-form-item label="购买下单次数">
+              <el-col :span="10">
+                <el-radio-group v-model="buyLimitModule.form.buyTimes" size="mini">
+                  <el-radio-button :label="0">不限制</el-radio-button>
+                  <el-radio-button :label="1">限制</el-radio-button>
+                </el-radio-group>
+              </el-col>
+            </el-form-item>
+            <div v-if="buyLimitModule.form.buyTimes === 1">
+              <el-form-item>
+                <el-col :span="10">
+                  <div class="sub-form-wrapper">
+                    <el-row>
+                      <el-col :span="8">
+                        <div class="sales-title" style="text-align: left;">
+                          下单次数（0：不限制）
+                        </div>
+                      </el-col>
+                      <el-col :span="8">
+                        <div class="sales-title" style="text-align: left;">
+                          单次最低购买量
+                        </div>
+                      </el-col>
+                      <el-col :span="8">
+                        <div class="sales-title" style="text-align: left;">
+                          单次最高购买量（0：不限制）
+                        </div>
+                      </el-col>
+                    </el-row>
+                    <el-row>
+                      <el-col :span="8">
+                        <div>
+                          <el-input-number v-model="buyLimitModule.form.buy_times_num" size="mini" :min="0"></el-input-number>
+                        </div>
+                      </el-col>
+                      <el-col :span="8">
+                        <div>
+                          <el-input-number v-model="buyLimitModule.form.minNumber" size="mini" :min="1"></el-input-number>
+                        </div>
+                      </el-col>
+                      <el-col :span="8">
+                        <div>
+                          <el-input-number v-model="buyLimitModule.form.highestNumber" size="mini" :min="0"></el-input-number>
+                        </div>
+                      </el-col>
+                    </el-row>
+                  </div>
+                </el-col>
+              </el-form-item>
+            </div>
+            <el-form-item label="开启虚拟销量">
+              <el-col :span="10">
+                <el-radio-group v-model="buyLimitModule.form.is_virtual_sales" size="mini">
+                  <el-radio-button v-for="item in virtualSalesList" :label="item.value" :key="item.value" :label="0">{{item.name}}</el-radio-button>
+                </el-radio-group>
+              </el-col>
+            </el-form-item>
+            <div v-if="buyLimitModule.form.is_virtual_sales === 1">
+              <el-form-item>
+                <el-col :span="10">
+                  <div class="sub-form-wrapper">
+                      <el-row>
+                        <el-col :span="4">
+                          <div class="sales-title" style="text-align: left;">
+                            虚拟销量
+                          </div>
+                        </el-col>
+                      </el-row>
+                      <el-row>
+                        <el-col :span="4">
+                          <div>
+                            <el-input-number v-model="buyLimitModule.form.virtual_sales" size="mini" :min="-1" :max="100000000"></el-input-number>
+                          </div>
+                        </el-col>
+                      </el-row>
+                  </div>
+                </el-col>
+              </el-form-item>
+            </div>
+            <el-form-item label="使用规则">
+              <el-col :span="10">
+                <el-radio-group v-model="buyLimitModule.form.before" size="mini">
+                  <el-radio-button v-for="item in beforeList" :label="item.value" :key="item.value">{{item.name}}</el-radio-button>
+                </el-radio-group>
+              </el-col>
+            </el-form-item>
+            <div v-if="buyLimitModule.form.before === 1">
+              <el-form-item>
+                <el-col :span="10">
+                  <div class="sub-form-wrapper">
+                      <el-row>
+                        <el-col :span="12">
+                          <div class="sales-title" style="text-align: left;">
+                            小时数
+                          </div>
+                        </el-col>
+                        <el-col :span="12">
+                          <div class="sales-title" style="text-align: left;">
+                            分钟数
+                          </div>
+                        </el-col>
+                      </el-row>
+                      <el-row>
+                        <el-col :span="12">
+                          <div>
+                            <el-input-number v-model="buyLimitModule.form.beforeHour" size="mini" :min="0"></el-input-number>
+                          </div>
+                        </el-col>
+                        <el-col :span="12">
+                          <div>
+                            <el-input-number v-model="buyLimitModule.form.beforeMinute" size="mini" :min="0"></el-input-number>
+                          </div>
+                        </el-col>
+                      </el-row>
+                  </div>
+                </el-col>
+              </el-form-item>
+            </div>
+            <div v-else-if="buyLimitModule.form.before === 2">
+              <el-form-item>
+                <el-col :span="10">
+                  <div class="sub-form-wrapper">
+                      <el-row>
+                        <el-col :span="12">
+                          <div class="sales-title" style="text-align: left;">
+                            天数
+                          </div>
+                        </el-col>
+                        <el-col :span="12">
+                          <div class="sales-title" style="text-align: left;">
+                            时间
+                          </div>
+                        </el-col>
+                      </el-row>
+                      <el-row>
+                        <el-col :span="12">
+                          <div>
+                            <el-input-number v-model="buyLimitModule.form.beforeDay" size="mini" :min="0"></el-input-number>
+                          </div>
+                        </el-col>
+                        <el-col :span="12">
+                          <div>
+                            <el-time-picker v-model="buyLimitModule.form.beforeTimeTemp" format="HH:mm" size="small" placeholder="时间" value-format="timestamp"></el-time-picker>
+                          </div>
+                        </el-col>
+                      </el-row>
+                  </div>
+                </el-col>
+              </el-form-item>
+            </div>
+            <el-form-item label="自定义商品内容">
+              <el-col :span="10">
+                <el-radio-group v-model="buyLimitModule.form.is_custom" size="mini">
+                  <el-radio-button v-for="item in customList" :label="item.value" :key="item.value" :label="0">{{item.name}}</el-radio-button>
+                </el-radio-group>
+              </el-col>
+            </el-form-item>
+            <div v-if="buyLimitModule.form.is_custom === 1">
+              <el-form-item>
+                <el-col :span="10">
+                  <div class="sub-form-wrapper">
+                    <el-row>
+                      <el-col>
+                        自定义标签
+                      </el-col>
+                    </el-row>
+                    <el-row>
+                      <el-col :span="24">
+                        <el-tag :key="tag" v-for="tag in buyLimitModule.form.tagsTemp" closable :disable-transitions="false" effect="dark" type="danger" @close="handlerTagClose" >{{tag}}</el-tag>
+                        <el-input class="input-new-tag" v-if="buyLimitModule.tagInputVisible" v-model="buyLimitModule.tagInputValue" ref="saveTagInput" size="small" @keyup.enter.native="handleTagInputConfirm" @blur="handleTagInputConfirm"></el-input>
+                        <el-button v-else class="button-new-tag" size="small" @click="showTagInput">+添加标签</el-button>
+                      </el-col>
+                    </el-row>
+                  </div>
+                </el-col>
+              </el-form-item>
+              <el-form-item>
+                <el-col :span="10">
+                  <div class="sub-form-wrapper">
+                    <el-row>
+                      <el-col>
+                        使用规则
+                      </el-col>
+                    </el-row>
+                    <el-row>
+                      <el-col :span="24">
+                        <el-input type="textarea" :rows="3" size="small" v-model="buyLimitModule.form.regulations" placeholder="请输入自定义的规则内容"></el-input>
+                      </el-col>
+                    </el-row>
+                  </div>
+                </el-col>
+              </el-form-item>
+            </div>
+            <el-form-item label="购买须知">
+              <el-col :span="10">
+                <el-radio-group v-model="buyLimitModule.form.is_notes" size="mini">
+                  <el-radio-button :label="0">不显示</el-radio-button>
+                  <el-radio-button :label="1">显示</el-radio-button>
+                </el-radio-group>
+              </el-col>
+            </el-form-item>
+          </el-form>
+        </el-card>
+      </div>
+      <div id="05">
+        <el-card>
+          <div slot="header" class="clearfix module-title">
+            <div class="my-flex-box-wrapper" style="justify-content: space-between; align-items: center;">
+              <span>{{menus[4]}}</span>
+              <el-button type="primary" size="small" @click="save5" v-if="debug">保&nbsp;&nbsp;&nbsp;&nbsp;存</el-button>
+            </div>
+          </div>
+          <el-form label-position="right"	label-width="120px">
+            <el-form-item label="用户信息">
+              <el-col :span="10">
+                <el-radio-group v-model="enterModule.form.tourists" size="mini">
+                  <el-radio-button v-for="item in userInfoList" :label="item.value" :key="item.value">{{item.name}}</el-radio-button>
+                </el-radio-group>
+              </el-col>
+            </el-form-item>
+            <div v-if="enterModule.form.tourists === 1 || enterModule.form.tourists === 2">
+              <el-form-item>
+                <el-col :span="10">
+                  <div class="sub-form-wrapper">
+                    <el-row>
+                      <el-col>
+                        所需用户信息
+                      </el-col>
+                    </el-row>
+                    <el-row>
+                      <el-col>
+                        <el-checkbox-group v-model="enterModule.form.touristsInfoTemp">
+                          <el-checkbox v-for="item in touristsInfoList" :label="item.value" :key="item.value">{{item.name}}</el-checkbox>
+                        </el-checkbox-group>
+                      </el-col>
+                    </el-row>
+                  </div>
+                </el-col>
+              </el-form-item>
+              <el-form-item>
+                <el-col :span="10">
+                  <div class="sub-form-wrapper">
+                    <el-row>
+                      <el-col>
+                        限制身份证号
+                      </el-col>
+                    </el-row>
+                    <el-row>
+                      <el-col :span="24">
+                        <el-input v-model="enterModule.form.is_id_number" size="small"></el-input>
+                        <el-link :underline="false">如:济南市37010(0为不限制)</el-link>
+                      </el-col>
+                    </el-row>
+                  </div>
+                </el-col>
+              </el-form-item>
+              <el-form-item>
+                <el-col :span="10">
+                  <div class="sub-form-wrapper">
+                    <el-row>
+                      <el-col>
+                        限制身份规则
+                      </el-col>
+                    </el-row>
+                    <el-row>
+                      <el-col :span="10">
+                        <el-radio-group v-model="enterModule.form.id_card_rule" size="mini">
+                          <el-radio-button v-for="item in idCardRuleList" :label="item.value" :key="item.value">{{item.name}}</el-radio-button>
+                        </el-radio-group>
+                      </el-col>
+                    </el-row>
+                  </div>
+                </el-col>
+              </el-form-item>
+            </div>
+            <el-form-item label="入园方式">
+              <el-col :span="10">
+                <el-radio-group v-model="enterModule.form.parkWays" size="mini">
+                  <el-radio-button v-for="item in parkWaysList" :label="item.value" :key="item.value">{{item.name}}</el-radio-button>
+                </el-radio-group>
+              </el-col>
+            </el-form-item>
+            <div v-if="enterModule.form.parkWays === 0">
+              <el-form-item>
+                <el-col :span="10">
+                  <div class="sub-form-wrapper">
+                    <el-row>
+                      <el-col>
+                        入园时间
+                      </el-col>
+                    </el-row>
+                    <el-row>
+                      <el-col :span="24">
+                        <el-time-picker
+                          style="width: 80%;"
+                          is-range
+                          size="small"
+                          v-model="enterModule.form.checkTimeRange"
+                          range-separator="至"
+                          start-placeholder="开始时间"
+                          end-placeholder="结束时间"
+                          format="HH:mm"
+                          placeholder="选择时间范围">
+                        </el-time-picker>
+                      </el-col>
+                    </el-row>
+                  </div>
+                </el-col>
+              </el-form-item>
+            </div>
+            <div v-else>
+              <el-form-item>
+                <el-col :span="10">
+                  <div class="sub-form-wrapper">
+                    <el-row>
+                      <el-col>
+                        换票时间
+                      </el-col>
+                    </el-row>
+                    <el-row>
+                      <el-col :span="24">
+                        <el-time-picker
+                          is-range
+                          size="small"
+                          v-model="enterModule.form.checkTimeRange"
+                          range-separator="至"
+                          start-placeholder="开始时间"
+                          end-placeholder="结束时间"
+                          format="HH:mm"
+                          value-format="timestamp"
+                          placeholder="选择时间范围">
+                        </el-time-picker>
+                      </el-col>
+                    </el-row>
+                  </div>
+                </el-col>
+              </el-form-item>
+              <el-form-item>
+                <el-col :span="10">
+                  <div class="sub-form-wrapper">
+                    <el-row>
+                      <el-col>
+                        换票地址
+                      </el-col>
+                    </el-row>
+                    <el-row>
+                      <el-col :span="24">
+                        <el-input v-model="enterModule.form.parkCheck" size="small" type="textarea" :rows="5" placeholder="请输入换票地址（必填）"></el-input>
+                      </el-col>
+                    </el-row>
+                  </div>
+                </el-col>
+              </el-form-item>
+            </div>
+            <el-form-item label="入园凭证">
+              <el-col>
+                <el-checkbox-group v-model="enterModule.form.parkProveTemp">
+                  <el-checkbox v-for="item in parkProveList" :label="item.value" :key="item.value">{{item.name}}</el-checkbox>
+                </el-checkbox-group>
+              </el-col>
+            </el-form-item>
+            <el-form-item label="有效证件">
+              <el-col :span="10">
+                <el-input v-model="enterModule.form.other_way" size="small" placeholder="请输入有效证件"></el-input>
+                <el-link :underline="false" type="warning">例如:学生证，校园卡，电子学籍，其中一中</el-link>
+              </el-col>
+            </el-form-item>
+            <el-form-item label="备注">
+              <el-col :span="10">
+                <el-input v-model="enterModule.form.check_time_notes" size="small" placeholder="请输入备注"></el-input>
+                <el-link :underline="false" type="warning">例如:请在此时间内换票，错过换票时间再有效期内隔日再来换票</el-link>
+              </el-col>
+            </el-form-item>
+            <el-form-item label="入园地址">
+              <el-col :span="10">
+                <el-input v-model="enterModule.form.parkDetails" size="small" type="textarea" :rows="5" placeholder="请输入入园地址（必填）"></el-input>
+              </el-col>
+            </el-form-item>
+          </el-form>
+        </el-card>
+      </div>
+      <div id="06">
+        <el-card>
+          <div slot="header" class="clearfix module-title">
+            <div class="my-flex-box-wrapper" style="justify-content: space-between; align-items: center;">
+              <span>{{menus[5]}}</span>
+              <el-button type="primary" size="small" @click="save6" v-if="debug">保&nbsp;&nbsp;&nbsp;&nbsp;存</el-button>
+            </div>
+          </div>
+          <el-form label-position="right"	label-width="120px">
+            <el-form-item label="有效期">
+              <el-col :span="10">
+                <el-radio-group v-model="verifyModule.form.deadlineType" size="mini">
+                  <el-radio-button v-for="item in deadlineTypeList" :label="item.value" :key="item.value">{{item.name}}</el-radio-button>
+                </el-radio-group>
+              </el-col>
+            </el-form-item>
+            <div v-if="verifyModule.form.deadlineType === 1">
+              <el-form-item>
+                <el-col :span="10">
+                  <div class="sub-form-wrapper">
+                    <el-row>
+                      <el-col :span="12">
+                        <div class="sales-title" style="text-align: left;">
+                          当日及<strong style="color: red; font-weight: bold;">前</strong> X 天有效
+                        </div>
+                      </el-col>
+                      <el-col :span="12">
+                        <div class="sales-title" style="text-align: left;">
+                          当日及<strong style="color: red; font-weight: bold;">后</strong> X 天有效
+                        </div>
+                      </el-col>
+                    </el-row>
+                    <el-row>
+                      <el-col :span="12">
+                        <div>
+                          <el-input-number v-model="verifyModule.form.deadlineFront" size="mini" :min="0"></el-input-number>
+                        </div>
+                      </el-col>
+                      <el-col :span="12">
+                        <div>
+                          <el-input-number v-model="verifyModule.form.deadlineLater" size="mini" :min="0"></el-input-number>
+                        </div>
+                      </el-col>
+                    </el-row>
+                  </div>
+                </el-col>
+              </el-form-item>
+            </div>
+            <div v-if="verifyModule.form.deadlineType === 2">
+              <el-form-item>
+                <el-col :span="10">
+                  <div class="sub-form-wrapper">
+                    <el-row>
+                      <el-col :span="12">
+                        <div class="sales-title" style="text-align: center;">
+                          生效时间
+                        </div>
+                      </el-col>
+                      <el-col :span="12">
+                        <div class="sales-title" style="text-align: center;">
+                          结束时间
+                        </div>
+                      </el-col>
+                    </el-row>
+                    <el-row>
+                      <el-col :span="24">
+                        <div>
+                          <el-date-picker style="width: 100%;" v-model="verifyModule.form.validPeriodRange" size="small" type="daterange" value-format="timestamp" range-separator="至" start-placeholder="开始日期" end-placeholder="结束日期"></el-date-picker>
+                        </div>
+                      </el-col>
+                    </el-row>
+                    <el-row style="margin-top: 10px;">
+                      <el-col :span="12">
+                        <div>
+                          <el-link :underline="false">可使用星期</el-link>
+                        </div>
+                      </el-col>
+                      <el-col :span="12">
+                        <div style="text-align: left;">
+                          <el-link :underline="false" @click="verifyAllSelected">全选</el-link>
+                          <el-link :underline="false" style="margin: 0 20px;" @click="verifyNormalDaySelected">平时</el-link>
+                          <el-link :underline="false" @click="verifyWeekDaySelected">周末</el-link>
+                        </div>
+                      </el-col>
+                    </el-row>
+                    <el-row>
+                      <el-col :span="24">
+                        <div>
+                          <el-checkbox-group v-model="verifyModule.form.valid_period_week_temp">
+                            <el-checkbox v-for="item in verifyWorkdayList" :label="item.value" :key="item.value">{{item.name}}</el-checkbox>
+                          </el-checkbox-group>
+                        </div>
+                      </el-col>
+                    </el-row>
+                  </div>
+                </el-col>
+              </el-form-item>
+            </div>
+            <el-form-item label="发码方式">
+              <el-radio-group v-model="verifyModule.form.sendCode" size="mini">
+                <el-radio-button v-for="item in sendCodeList" :label="item.value" :key="item.value">{{item.name}}</el-radio-button>
+              </el-radio-group>
+            </el-form-item>
+            <div v-if="verifyModule.form.sendCode === 0">
+              <el-form-item>
+                <el-col :span="10">
+                  <div class="sub-form-wrapper">
+                    <el-row>
+                      <el-col>验证规则</el-col>
+                    </el-row>
+                    <el-row>
+                      <el-col :span="24">
+                        <el-radio-group v-model="verifyModule.form.checkRules" size="mini">
+                          <el-radio-button v-for="item in checkRulesList" :label="item.value" :key="item.value">{{item.name}}</el-radio-button>
+                        </el-radio-group>
+                      </el-col>
+                    </el-row>
+                  </div>
+                </el-col>
+              </el-form-item>
+              <el-form-item>
+                <el-col :span="10">
+                  <div class="sub-form-wrapper">
+                    <el-row>
+                      <el-col>
+                        最低验证数
+                      </el-col>
+                    </el-row>
+                    <el-row>
+                      <el-col :span="24">
+                        <el-input-number v-model="verifyModule.form.checkNumber" size="mini" :min="0"></el-input-number>
+                        <el-link :underline="false">0：不受限制</el-link>
+                      </el-col>
+                    </el-row>
+                  </div>
+                </el-col>
+              </el-form-item>
+            </div>
+          </el-form>
+        </el-card>
+      </div>
+      <div id="07">
+        <el-card>
+          <div slot="header" class="clearfix module-title">
+            <div class="my-flex-box-wrapper" style="justify-content: space-between; align-items: center;">
+              <span>{{menus[6]}}</span>
+              <el-button type="primary" size="small" @click="save7" v-if="debug">保&nbsp;&nbsp;&nbsp;&nbsp;存</el-button>
+            </div>
+          </div>
+          <el-form label-position="right"	label-width="120px">
+            <el-form-item label="退款规则">
+              <el-col :span="10">
+                <el-radio-group v-model="refundModule.form.refundRules" size="mini">
+                  <el-radio-button v-for="item in refundList" :label="item.value" :key="item.value">{{item.name}}</el-radio-button>
+                </el-radio-group>
+              </el-col>
+            </el-form-item>
+            <div v-if="refundModule.form.refundRules !== 0">
+              <el-form-item>
+                <el-col :span="10">
+                  <div class="sub-form-wrapper">
+                    <el-row v-if="refundModule.form.refundRules === 2">
+                      <el-col>
+                        <span>时间限制</span>
+                        <el-select v-model="refundModule.form.refundTimeBar" clearable placeholder="请选择" size="mini">
+                          <el-option
+                            v-for="item in refundTimeBarList"
+                            :key="item.value"
+                            :label="item.name"
+                            :value="item.value">
+                          </el-option>
+                        </el-select>
+                      </el-col>
+                    </el-row>
+                    <el-row>
+                      <el-col>
+                        <el-radio-group v-model="refundModule.form.refundChargePlan" size="mini">
+                          <el-radio-button v-for="item in refundChargePlanList" :label="item.value" :key="item.value">{{item.name}}</el-radio-button>
+                        </el-radio-group>
+                      </el-col>
+                    </el-row>
+                    <el-row v-if="refundModule.form.refundChargePlan !== 0" style="margin-top: 10px;">
+                      <el-col>
+                        <span>手续费金额</span>
+                        <el-input-number v-model="refundModule.form.refundChargeMoney" size="mini" :min="0"></el-input-number>
+                      </el-col>
+                    </el-row>
+                    <el-row>
+                      <el-col>
+                        <div>
+                          <!-- <el-switch
+                            v-model="refundModule.form.refundCheck"
+                            :active-value="1"
+                            :inactive-value="0"
+                            active-text="是否需要审核">
+                          </el-switch> -->
+                          <!-- <el-switch
+                            v-model="refundModule.form.refundCheck"
+                            :active-value="0"
+                            :inactive-value="1"
+                            active-color="#13ce66"
+                            inactive-color="#ff4949"
+                            active-text="需要审核"
+                            inactive-text="不需要审核">
+                          </el-switch> -->
+                          <el-radio-group v-model="refundModule.form.refundCheck">
+                            <el-radio :label="0">退款需要人工审核</el-radio>
+                            <el-radio :label="1">退款不需要人工审核</el-radio>
+                          </el-radio-group>
+                        </div>
+                      </el-col>
+                    </el-row>
+                  </div>
+                </el-col>
+              </el-form-item>
+            </div>
+            <el-form-item label="过期操作">
+              <el-col :span="10">
+                <el-radio-group v-model="refundModule.form.over" size="mini">
+                  <el-radio-button v-for="item in overList" :label="item.value" :key="item.value">{{item.name}}</el-radio-button>
+                </el-radio-group>
+              </el-col>
+            </el-form-item>
+            <div v-if="refundModule.form.over !== 0">
+              <el-form-item>
+                <el-col :span="10">
+                  <div class="sub-form-wrapper">
+                    <el-row>
+                      <el-col :span="24">
+                        此操作将于   <el-input-number v-model="refundModule.form.overDay" size="mini" :min="0"></el-input-number>   天  
+                        <el-time-picker v-model="refundModule.form.overTimeTemp" format="HH:mm" default-value="timestamp" size="mini" placeholder="时间" style="width: 130px;"></el-time-picker>  后执行
+                      </el-col>
+                    </el-row>
+                  </div>
+                </el-col>
+              </el-form-item>
+            </div>
+            <div v-if="refundModule.form.over === 3">
+              <el-form-item>
+                <el-col :span="10">
+                  <div class="sub-form-wrapper">
+                    <el-row>
+                      <el-col>
+                        过期退款收取手续费方式
+                      </el-col>
+                    </el-row>
+                    <el-row>
+                      <el-col>
+                        <el-radio-group v-model="refundModule.form.expire_charge_way" size="mini">
+                          <el-radio-button v-for="item in expireChargeWayList" :label="item.value" :key="item.value">{{item.name}}</el-radio-button>
+                        </el-radio-group>
+                      </el-col>
+                    </el-row>
+                    <el-row v-if="refundModule.form.expire_charge_way !== 0" style="margin-top: 10px;">
+                      <el-col>
+                        <span>手续费金额</span>
+                        <el-input-number v-model="refundModule.form.overRefundChargeMoney" size="mini" :min="0"></el-input-number>
+                      </el-col>
+                    </el-row>
+                  </div>
+                </el-col>
+              </el-form-item>
+            </div>
+            <el-form-item label="是否允许改签">
+              <el-col :span="10">
+                <el-radio-group v-model="refundModule.form.ticket_changing" size="mini">
+                  <el-radio-button v-for="item in ticketChangingList" :label="item.value" :key="item.value">{{item.name}}</el-radio-button>
+                </el-radio-group>
+              </el-col>
+            </el-form-item>
+            <div v-if="refundModule.form.ticket_changing === 1">
+              <el-form-item>
+                <el-col :span="10">
+                  <div class="sub-form-wrapper">
+                    <el-row>
+                      <el-col>
+                        改签设置
+                      </el-col>
+                    </el-row>
+                    <el-row>
+                      <el-col :span="24">
+                        <div>
+                          <span>允许改签前后</span>
+                          <el-input-number v-model="refundModule.form.ticket_changing_range" size="mini" :min="0"></el-input-number>
+                          <span>天内</span>
+                        </div>
+                      </el-col>
+                    </el-row>
+                  </div>
+                </el-col>
+              </el-form-item>
+              <el-form-item>
+                <el-col :span="10">
+                  <div class="sub-form-wrapper">
+                    <el-row>
+                      <el-col :span="24">
+                        <el-checkbox v-model="refundModule.form.ticket_changing_audit">需要审核</el-checkbox>
+                        <el-checkbox v-model="refundModule.form.ticket_changing_weekend">平日允许修改到周末</el-checkbox>
+                      </el-col>
+                    </el-row>
+                    <el-row>
+                      <el-col :span="24">
+                        <el-link type="warning" :underline="false">1】只能改签一次，仅限改签游玩时间，2】如果改签产生差价请在下线交易，请在改签规则中说明。</el-link>
+                      </el-col>
+                    </el-row>
+                  </div>
+                </el-col>
+              </el-form-item>
+              <el-form-item>
+                <el-col :span="10">
+                  <div class="sub-form-wrapper">
+                    <el-row>
+                      <el-col>
+                        改签规则
+                      </el-col>
+                    </el-row>
+                    <el-row>
+                      <el-col :span="24">
+                        <el-input v-model="refundModule.form.ticket_changing_rule" type="textarea" :rows="5" placeholde="请输入改签规则"></el-input>
+                      </el-col>
+                    </el-row>
+                  </div>
+                </el-col>
+              </el-form-item>
+            </div>
+          </el-form>
+        </el-card>
+      </div>
+      <div id="08">
+        <el-card>
+          <div slot="header" class="clearfix module-title">
+            <div class="my-flex-box-wrapper" style="justify-content: space-between; align-items: center;">
+              <span>{{menus[7]}}</span>
+              <el-button type="primary" size="small" @click="save8" v-if="debug">保&nbsp;&nbsp;&nbsp;&nbsp;存</el-button>
+            </div>
+          </div>
+          <el-form label-position="right"	label-width="120px">
+            <el-form-item label="客户通知">
+              <el-checkbox-group v-model="smsModule.form.notifyCustomerTemp">
+                <el-checkbox v-for="item in notifyCustomerList" :label="item.value" :key="item.value">{{item.name}}</el-checkbox>
+              </el-checkbox-group>
+            </el-form-item>
+            <el-form-item label="供应商通知">
+              <el-checkbox-group v-model="smsModule.form.notifyMerchantTemp">
+                <el-checkbox v-for="item in notifyMerchantList" :label="item.value" :key="item.value">{{item.name}}</el-checkbox>
+              </el-checkbox-group>
+            </el-form-item>
+            <el-form-item label="短信内容">
+              <el-col :span="10">
+                <el-input v-model="smsModule.form.message_content" type="textarea" :rows="5" maxlength="130" show-word-limit placeholder="请输入短信内容（必填）"></el-input>
+                <el-link :underline="false" type="warning">65字为一条短信 限2条(130字)</el-link>
+              </el-col>
+            </el-form-item>
+          </el-form>
+        </el-card>
+      </div>
+      <div id="09">
+        <el-card>
+          <div slot="header" class="clearfix module-title">
+            <span>{{menus[8]}}</span>
+          </div>
+          <el-form label-position="right"	label-width="120px">
+            <el-form-item label="上架">
+              <el-radio-group v-model="upDownModule.form.putaway" size="mini">
+                <el-radio-button v-for="item in putawayList" :label="item.value" :key="item.value">{{item.name}}</el-radio-button>
+              </el-radio-group>
+            </el-form-item>
+            <div v-if="upDownModule.form.putaway === 2">
+              <el-form-item>
+                <el-col :span="10">
+                  <div class="sub-form-wrapper">
+                    <el-row>
+                      <el-col>
+                        选择时间
+                      </el-col>
+                    </el-row>
+                    <el-row>
+                      <el-col>
+                        <el-date-picker v-model="upDownModule.form.putawayTimeTemp" type="datetime" placeholder="选择日期时间" size="small" value-format="timestamp" default-time="12:00:00"></el-date-picker>
+                      </el-col>
+                    </el-row>
+                  </div>
+                </el-col>
+              </el-form-item>
+            </div>
+            <div v-if="upDownModule.form.putaway === 3">
+              <el-form-item>
+                <el-col :span="10">
+                  <div class="sub-form-wrapper">
+                    <el-row>
+                      <el-col :span="12" style="text-align: center;">
+                        开始时间
+                      </el-col>
+                      <el-col :span="12" style="text-align: center;">
+                        结束时间
+                      </el-col>
+                    </el-row>
+                    <el-row>
+                      <el-col :span="24">
+                        <el-date-picker
+                          style="width: 100%;"
+                          v-model="upDownModule.form.putawayTimeRange"
+                          type="datetimerange"
+                          range-separator="至"
+                          size="small"
+                          value-format="timestamp"
+                          start-placeholder="开始日期"
+                          end-placeholder="结束日期">
+                        </el-date-picker>
+                      </el-col>
+                    </el-row>
+                  </div>
+                </el-col>
+              </el-form-item>
+            </div>
+            <el-form-item label="下架">
+              <el-radio-group v-model="upDownModule.form.unShelve" size="mini">
+                <el-radio-button v-for="item in unShelveList" :label="item.value" :key="item.value">{{item.name}}</el-radio-button>
+              </el-radio-group>
+            </el-form-item>
+            <div v-if="upDownModule.form.unShelve === 1">
+              <el-form-item>
+                <el-col :span="10">
+                  <div class="sub-form-wrapper">
+                    <el-row>
+                      <el-col :span="12" style="text-align: center;">
+                        开始时间
+                      </el-col>
+                      <el-col :span="12" style="text-align: center;">
+                        结束时间
+                      </el-col>
+                    </el-row>
+                    <el-row>
+                      <el-col :span="24">
+                        <el-date-picker
+                          style="width: 100%;"
+                          v-model="upDownModule.form.unShelveTimeRange"
+                          type="datetimerange"
+                          range-separator="至"
+                          size="small"
+                          value-format="timestamp"
+                          start-placeholder="开始日期"
+                          end-placeholder="结束日期">
+                        </el-date-picker>
+                      </el-col>
+                    </el-row>
+                  </div>
+                </el-col>
+              </el-form-item>
+            </div>
+          </el-form>
+        </el-card>
+      </div>
+      <el-card>
+        <div style="text-align: right;">
+          <el-button type="primary" size="small" @click="save" v-loading.fullscreen.lock="fullscreenLoading">保&nbsp;&nbsp;&nbsp;&nbsp;存</el-button>
+        </div>
+      </el-card>
+    </div>
+    <div class="my-flex-box-wrapper menu-wrapper">
+      <el-tabs v-model="currentTab" tab-position="right" style="height: 70%; background-color: white;" @tab-click="tabClick">
+        <el-tab-pane v-for="(item, index) of menus" :key="index" :label="item" :name="item"></el-tab-pane>
+      </el-tabs>
+    </div>
+  </div>
+<script>
+  axios.defaults.headers.post['Content-Type'] = 'application/x-www-form-urlencoded'
+  var qs = Qs
+  var debug = false // 通过这个开关设置，可以很方便的控制是否需要使用php代码，和baseUrl的控制
+  var baseUrl = 'http://192.168.0.110' // 基本的URL
+  var loadGoodsTypesUrl = (debug ? baseUrl : '') + '/store/goods/goods_list/goodsType' // 加载商品分类URL
+  var saveGoodsInfoUrl = (debug ? baseUrl : '') + '/store/goods/goods_list/createGoods' // 提交数据URL
+  /** goods action urls **/
+  var app = new Vue({
+    el: '#app',
+    data () {
+      return {
+        debug: false,
+        menus: ['商品信息', '销售方案', '费用说明', '购买限制', '入园方式', '验证设置', '退改设置', '短信设置', '上下架设置'],
+        rangeHeight: [],
+        paddingTop: 10,
+        currentTab: '商品信息',
+        show: false,
+        fullscreenLoading: false,
+        inputSpanObj: {
+          gutter: 50,
+          timeRange: 8,
+          costPrice: 4,
+          salesPrice: 4,
+          retailPrice: 4,
+          dayStock: 4,
+        },
+        categoryInfo: {
+          data: goodsCategoryData
+        },
+        sellerInfo: {
+          data: goodsSellerInfoData
+        },
+        goodsInfoModule: {
+          form: goodsInfoFormData,
+          checkRules: goodsInfoModulecheckRules
+        },
+        saleSchemeModule: {
+          form: goodsSalesSchemeFormData,
+          checkRules: goodsSalesSchemeCheckRules
+        },
+        moneyModule: {
+          form: goodsInfoMoneyFormData,
+          checkRules: goodsInfoMoneyCheckRules
+        },
+        buyLimitModule: {
+          form: goodsInfoBuyLimitFormData,
+          checkRules: goodsInfoBuyLimitCheckRules,
+          tagInputVisible: false,
+          tagInputValue: ''
+        },
+        enterModule: {
+          form: goodsInfoEnterFormData,
+          checkRules: goodsInfoEnterCheckRules
+        },
+        verifyModule: {
+          form: goodsInfoVerifyFormData,
+          checkRules: goodsInfoVerifyCheckRules
+        },
+        refundModule: {
+          form: goodsInfoRefundFormData,
+          checkRules: goodsInfoRefundCheckRules
+        },
+        smsModule: {
+          form: goodsInfoSmsFormData,
+          checkRules: goodsInfoSmsCheckRules
+        },
+        upDownModule: {
+          form: goodsInfoUpDownFormData,
+          checkRules: goodsInfoUpDownCheckRules
+        }
+      }
+    },
+    computed: {
+      changeHeightObj () {
+        return {
+          buyTimes: this.buyLimitModule.form.buyTimes,
+          is_virtual_sales: this.buyLimitModule.form.is_virtual_sales,
+          before: this.buyLimitModule.form.before,
+          custom: this.buyLimitModule.form.is_custom,
+          
+          tourists: this.enterModule.form.tourists,
+          parkWays: this.enterModule.form.parkWays,
+
+          deadlineType: this.verifyModule.form.deadlineType,
+          sendCode: this.verifyModule.form.sendCode,
+
+          refund: this.refundModule.form.refund,
+          over: this.refundModule.form.over,
+          ticket_changing: this.refundModule.form.ticket_changing,
+          expire_charge_way: this.refundModule.form.expire_charge_way,
+          refundChargePlan: this.refundModule.form.refundChargePlan,
+
+          putaway: this.upDownModule.form.putaway,
+          putawayStartTimeing: this.upDownModule.form.putawayStartTimeing,
+          unShelve: this.upDownModule.form.unShelve
+        }
+      },
+      tempCategoryList () {
+        const tempList = []
+        if (!this.categoryInfo.data.categoryList) {
+          return tempList
+        }
+        const length = this.categoryInfo.data.categoryList.length
+        for(let i = 0; i < length; i++) {
+          const tempIndex = Math.floor(i / 4)
+          if (!tempList[tempIndex]) {
+            tempList[tempIndex] = []
+          }
+          tempList[tempIndex].push(this.categoryInfo.data.categoryList[i])
+        }
+        return tempList
+      }
+    },
+    watch: {
+      changeHeightObj: {
+        handler() {
+          this.calcItemHeight()
+        },
+        deep: true,
+        immediate: true
+      }
+    },
+    methods: {
+      scrollEvent () {
+        const scrollTop = window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop
+        for(let i = 0; i < this.menus.length; i++) {
+          if (scrollTop >= this.rangeHeight[i].start && scrollTop < this.rangeHeight[i].end) {
+            this.currentTab = this.menus[i]
+            break
+          }
+        }
+      },
+      tabClick (item) {
+        // window.scroll({ top: this.rangeHeight[item.index].start, left: 0, behavior: 'smooth' })
+        window.scroll(0, this.rangeHeight[item.index].start)
+      },
+      calcItemHeight () {
+        this.$nextTick(_ => {
+          this.rangeHeight = []
+          for(let i = 0; i < this.menus.length; i++) {
+            let tempIndex = i + 1
+            if (this.rangeHeight.length === 0) {
+              this.rangeHeight.push({
+                start: 0,
+                end: document.getElementById("0" + tempIndex).offsetHeight + this.paddingTop * 2
+              })
+            } else {
+              const beforIndex = i - 1
+              this.rangeHeight.push({
+                start: this.rangeHeight[beforIndex].end,
+                end: this.rangeHeight[beforIndex].end + document.getElementById("0" + tempIndex).offsetHeight + this.paddingTop
+              })
+            }
+          }
+        })
+      },
+      showTagInput () {
+        this.buyLimitModule.tagInputVisible = true
+        this.$nextTick(_ => {
+          this.$refs.saveTagInput.$refs.input.focus();
+        })
+      },
+      handleTagInputConfirm () {
+        let inputValue = this.buyLimitModule.tagInputValue;
+        if (inputValue) {
+          this.buyLimitModule.form.tagsTemp.push(inputValue);
+        }
+        this.buyLimitModule.tagInputVisible = false;
+        this.buyLimitModule.tagInputValue = '';
+      },
+      handlerTagClose (tag) {
+        this.buyLimitModule.form.tagsTemp.splice(this.buyLimitModule.form.tagsTemp.indexOf(tag), 1);
+      },
+      showErrorMsg (msg) {
+        this.$message({
+          type: 'error',
+          message: msg
+        });
+      },
+      save1() {
+        console.log(this.goodsInfoModule.checkRules.check())
+      },
+      save2() {
+        console.log(this.saleSchemeModule.checkRules.check())
+      },
+      save3() {
+        console.log(this.moneyModule.checkRules.check())
+      },
+      save4() {
+        console.log(this.buyLimitModule.checkRules.check())
+      },
+      save5() {
+        console.log(this.enterModule.checkRules.check())
+      },
+      save6() {
+        console.log(this.verifyModule.checkRules.check());
+      },
+      save7() {
+        console.log(this.refundModule.checkRules.check());
+      },
+      save8() {
+        console.log(this.smsModule.checkRules.check());
+      },
+      save () {
+        const infoResult = this.goodsInfoModule.checkRules.check()
+        if (infoResult instanceof Error) {
+          this.showErrorMsg(infoResult.message)
+          return
+        }
+        const salesSchemeResult = this.saleSchemeModule.checkRules.check()
+        if (salesSchemeResult instanceof Error) {
+          this.showErrorMsg(salesSchemeResult.message)
+          return
+        }
+        const moneyResult = this.moneyModule.checkRules.check()
+        if (moneyResult instanceof Error) {
+          this.showErrorMsg(moneyResult.message)
+          return
+        }
+        const buyLimitResult = this.buyLimitModule.checkRules.check()
+        if (buyLimitResult instanceof Error) {
+          this.showErrorMsg(buyLimitResult.message)
+          return
+        }
+        const enterResult = this.enterModule.checkRules.check()
+        if (enterResult instanceof Error) {
+          this.showErrorMsg(enterResult.message)
+          return
+        }
+        const verifyResult = this.verifyModule.checkRules.check()
+        if (verifyResult instanceof Error) {
+          this.showErrorMsg(verifyResult.message)
+          return
+        }
+        const refundResult = this.refundModule.checkRules.check()
+        if (refundResult instanceof Error) {
+          this.showErrorMsg(refundResult.message)
+          return
+        }
+        const smsResult = this.smsModule.checkRules.check()
+        if (smsResult instanceof Error) {
+          this.showErrorMsg(smsResult.message)
+          return
+        }
+        const upDownResult = this.upDownModule.checkRules.check()
+        if (upDownResult instanceof Error) {
+          this.showErrorMsg(upDownResult.message)
+          return
+        }
+        const postData = {}
+        postData.goodsBaseInfo = infoResult
+        postData.saleScheme = salesSchemeResult
+        postData.moneyInfo = moneyResult
+        postData.buyLimitInfo = buyLimitResult
+        postData.enterInfo = enterResult
+        postData.verifyInfo = verifyResult
+        postData.refundInfo = refundResult
+        postData.smsInfo = smsResult
+        postData.upDownInfo = upDownResult
+        axios.post(saveGoodsInfoUrl, qs.stringify({
+           category_id: debug ? 13 : {$category_id}, // 通过dubug开关设置是否需要开启php代码
+           scenic_id: debug ? 1 : {$scenic_id}, // 通过dubug开关设置是否需要开启php代码
+           data: JSON.stringify(postData)
+         })).then(res => {
+           this.fullscreenLoading = false
+           window.location.href = '/store/goods/goods_list'
+         }).catch(error => {
+           this.fullscreenLoading = false
+           this.$message.error('产品添加失败');
+         })
+      },
+      onResize () {
+        let clientWidth = document.body.clientWidth
+        if (clientWidth < 768) {
+          this.inputSpanObj.gutter = 10
+          this.inputSpanObj.timeRange = 3
+          this.inputSpanObj.costPrice = 3
+          this.inputSpanObj.salesPrice = 3
+          this.inputSpanObj.retailPrice = 3
+          this.inputSpanObj.dayStock = 3
+        } else if (clientWidth > 768 && clientWidth < 992) {
+          this.inputSpanObj.gutter = 10
+          this.inputSpanObj.timeRange = 8
+          this.inputSpanObj.costPrice = 4
+          this.inputSpanObj.salesPrice = 4
+          this.inputSpanObj.retailPrice = 4
+          this.inputSpanObj.dayStock = 4
+        } else {
+          this.inputSpanObj.gutter = 50
+          this.inputSpanObj.timeRange = 8
+          this.inputSpanObj.costPrice = 4
+          this.inputSpanObj.salesPrice = 4
+          this.inputSpanObj.retailPrice = 4
+          this.inputSpanObj.dayStock = 4
+        }
+      }
+    },
+    mounted () {
+      window.addEventListener('scroll', this.scrollEvent)
+      window.onresize = this.onResize
+      this.onResize()
+      loadGoodsTypes(loadGoodsTypesUrl, qs.stringify({category_id: debug ? 13 : {$category_id}})) // 通过debug开关设置，可以设置是否加载php代码
+      this.goodsInfoModule.form.sellerName = "{$scenic_name}"
+    }
+  })
+</script>
+</body>
+</html>

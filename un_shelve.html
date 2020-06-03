@@ -1,0 +1,365 @@
+<!--
+ * @Author: lf
+ * @Date: 2020-05-15 10:53:47
+ * @LastEditTime: 2020-05-22 18:08:24
+ * @LastEditors: Please set LastEditors
+ * @Description: In User Settings Edit
+ * @FilePath: /small-shop/Users/lf/Desktop/ydk-project/html-admin/scenic-list.html
+ -->
+ <!DOCTYPE html>
+ <html lang="cn">
+ <head>
+   <meta charset="UTF-8">
+   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+   <title>产品列表</title>
+   <link rel="stylesheet" href="/style/element-ui.css"></link>
+   <link rel="stylesheet" href="/style/scenic-list.css">
+   <script src="/js/vue.min.js"></script>
+   <script src="/js/jquery.min.js"></script>
+   <script src="/js/element-ui.min.js"></script>
+   <script src="/js/axios.min.js"></script>
+   <script src="/js/qs.min.js"></script>
+   <script src="/layer/layer.js"></script>
+ </head>
+ <body>
+   <div id="app" class="container" v-loading.fullscreen.lock="fullscreenLoading">
+     <div>
+       <el-card style="margin-bottom: 10px; text-align: right;">
+         <el-input placeholder="搜索商家" class="input-with-select" style="width: 30%;" v-model="searchContent">
+           <el-button slot="append" icon="el-icon-search" @click="onSearch"></el-button>
+         </el-input>
+       </el-card>
+       <div v-if="tableData && tableData.length > 0">
+         <el-card v-for="(item, index) of tableData" style="margin-bottom: 20px;">
+           <div slot="header" class="clearfix">
+             <div class="s-box-flex-wrapper scenic-header-info-wrapper">
+               <div class="img-wrapper">
+                 <el-image :src="item.scenicimages.split(',')[0]" :alt="item.s_title" lazy style="border-radius: 5px; height: 100%;" fit="cover"></el-image>
+               </div>
+               <div class="s-box-flex-wrapper info-wrapper">
+                 <div>
+                   <span class="info-label">商家名称：</span>
+                   <span style="color: #409EFF; font-weight: bold;">
+                     {{item.s_title}}
+                   </span>
+                 </div>
+                 <div>
+                   <span class="info-label">商家状态：</span>
+                   {{item.is_status === 1 ? '上架' : '下架'}}
+                 </div>
+                 <div>
+                   <span class="info-label">商家分类：</span>
+                   {{item.category_name}}
+                 </div>
+                 <div>
+                   <span class="info-label">商家地址：</span>
+                   <span>
+                     {{item.city + item.address}}
+                   </span>
+                 </div>
+               </div>
+               <div class="s-box-flex-wrapper action-wrapper">
+                 <!-- <el-button type="danger" size="small" icon="el-icon-refresh" circle></el-button> -->
+                 <!-- <el-button type="danger" size="mini" plain @click="changeSellerStatus(item)">
+                   下架景区
+                 </el-button> -->
+                 <el-button type="warning" size="mini" plain @click="showPasswordDialog(item)">查看密码</el-button>
+                 <el-button type="success" size="mini" plain @click="layerOpenWindow({ type: 2, content: ticketVerifyUrl + item.s_id, area: ['900px', '865px'] })">
+                   门票验证
+                 </el-button>
+                 <el-button type="primary" size="mini" plain>
+                   <a class="button-link" :href="modifyAreaUrl + item.s_id">修改信息</a>
+                 </el-button>
+                 <el-button type="primary" size="mini">
+                   <a class="button-link" :href="addGoodsUrl + item.category_id + '&scenic_id=' + item.s_id">添加票类</a>
+                 </el-button>
+               </div>
+             </div>
+           </div>
+           <el-table :data="tempData[index] || item.goods" stripe border style="width: 100%" size="small" :header-row-style="{color: '#333333'}">
+             <el-table-column prop="goodsId" label="商品ID" align="center" width="80px"></el-table-column>
+             <el-table-column prop="goodsTitle" label="商品名称" width="250" align="center">
+               <template slot-scope="scope">
+                 <span style="font-weight: bold; color: #333333;">{{scope.row.goodsTitle}}</span>
+               </template>
+             </el-table-column>
+             <el-table-column prop="goodsTypeName" label="商品类型" align="center"></el-table-column>
+             <el-table-column label="销量" align="center">
+               <template slot-scope="scope">
+                 <span>{{scope.row.totalSales}}</span>
+               </template>
+             </el-table-column>
+             <el-table-column label="成本价" align="center">
+               <template slot-scope="scope">
+                 <span class="price"><span style="font-size: 12px;">&yen; </span>{{scope.row.sales[0].costPrice}}</span>
+               </template>
+             </el-table-column>
+             <el-table-column prop="address" label="销售价" align="center">
+               <template slot-scope="scope">
+                 <span class="price"><span style="font-size: 12px;">&yen; </span>{{scope.row.sales[0].salePrice}}</span>
+               </template>
+             </el-table-column>
+             <el-table-column prop="address" label="门市价" align="center">
+               <template slot-scope="scope">
+                 <span class="price"><span style="font-size: 12px;">&yen; </span>{{scope.row.sales[0].retailPrice}}</span>
+               </template>
+             </el-table-column>
+             <el-table-column prop="date" label="结束时间" align="center">
+               <template slot-scope="scope">
+                 <span>{{dateFormat(scope.row.sales[0].endTime)}}</span>
+               </template>
+             </el-table-column>
+             <el-table-column prop="status" label="状态" align="center">
+               <template slot-scope="scope">
+                 <span>{{scope.row.sales[0].sales_status === 0 ? '过期' : '正常'}}</span>
+               </template>
+             </el-table-column>
+             <el-table-column prop="weigh" label="权重" align="center"></el-table-column>
+             <el-table-column label="操作" align="center" fixed="right" min-width="180px">
+               <template slot-scope="scope">
+                 <div class="table-action-wrapper">
+                   <el-button type="primary" size="mini" class="table-action" @click="changeGoodsStatus(item, index, scope.row)">
+                     上架
+                   </el-button>
+                   <el-button type="warning" size="mini" class="table-action">
+                     <a class="button-link" :href="modifyUrl + scope.row.goodsId">修改</a>
+                   </el-button>
+                   <el-button type="danger" size="mini" class="table-action" @click="deleteGoods(item, index, scope.row)">
+                     删除
+                   </el-button>
+                 </div>
+               </template>
+             </el-table-column>
+           </el-table>
+           <div class="show-more-wrapper" v-if="item.goods.length > threshold">
+             <el-link v-show="!item.showMoreFlag" type="primary" @click="showMoreGoods(item, index)">显示全部，共{{item.goods.length}}条记录<i class="el-icon-caret-bottom"></i></el-link>
+             <el-link v-show="item.showMoreFlag" type="primary" @click="showMoreGoods(item, index)">收起更多<i class="el-icon-caret-top"></i></el-link>
+           </div>
+         </el-card>
+         <div style="text-align: center;">
+           <el-pagination
+             v-if="tempData.length > 0"
+             :page-size="5"
+             background
+             :current-page.sync="page"
+             layout="total, prev, pager, next, jumper"
+             :total="total"
+             @prev-click="handleCurrentChange"
+             @next-click="handleCurrentChange"
+             @current-change="handleCurrentChange">
+           </el-pagination>
+         </div>
+       </div>
+       <div v-else style="text-align: center; margin-top: 20px; color: #888888;">
+         {{loadingTip}}
+       </div>
+     </div>
+     <el-dialog :title="passwordItem.scenicName + '  账号密码'" :visible.sync="dialogFormVisible">
+      <el-form :model="form">
+        <el-form-item label="账号">
+          <el-col :span="10">
+            <el-input v-model="passwordItem.account" readonly></el-input>
+          </el-col>
+        </el-form-item>
+        <el-form-item label="密码">
+          <el-col :span="10">
+            <el-input v-model="passwordItem.password" readonly></el-input>
+          </el-col>
+        </el-form-item>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button type="primary" @click="dialogFormVisible = false">确 定</el-button>
+      </div>
+    </el-dialog>
+   </div>
+ <script>
+   axios.defaults.headers.post['Content-Type'] = 'application/x-www-form-urlencoded'
+   var qs = Qs
+   var baseUrl = 'http://192.168.0.110' // 基本的URL
+ 
+   var getScenicList = baseUrl + '/store/goods/goods_list/un_shelve' // 获取下架景区产品接口
+   var delGoods = baseUrl + '/store/goods/goods_list/delGoods' // 删除商品
+   var changeGoodsStatus = baseUrl + '/store/goods/goods_list/goodsUpShelve' // 下架景区产品
+ 
+   /** area action urls **/
+   var setPasswordUrl = baseUrl + '/store/goods/goods_list/lookPassword' // 设置密码
+   var ticketVerifyUrl = baseUrl + '/store/goods/set_scenic/verify?ids=' // 票务验证
+   var modifyAreaUrl = baseUrl + '/store/scenic/edit?ids=' // 修改景区信息
+   var addGoodsUrl = baseUrl + '/store/goods/goods/ticket?goods_category=' // 添加产品
+ 
+   /** goods action urls **/
+   var modifyUrl = baseUrl + '/store/goods/goods/edit_ticket/ids/' // 修改产品
+   /** goods action urls **/
+   var app = new Vue({
+     el: '#app',
+     data () {
+       return {
+         tempData: [],
+         threshold: 3,
+         tableData: [],
+         fullscreenLoading: false,
+         loadingTip: '正在加载数据……',
+         searchContent: '',
+         total: 0,
+         page: 1,
+         dialogFormVisible: false,
+         passwordItem: {},
+         form: {
+           name: '',
+           password: ''
+         }
+       }
+     },
+     watch: {
+       page (newVal, oldVal) {
+         this.getData()
+       }
+     },
+     methods: {
+       initTempData () {
+         this.tableData.forEach((it, index) => {
+           it.scenicimages = baseUrl + it.scenicimages.split(',')[0]
+           if (it.goods && it.goods.length > this.threshold) {
+             this.$set(it, 'showMoreFlag', false)
+             this.tempData[index] = []
+             this.tempData[index] = it.goods.slice(0, this.threshold)
+           } else {
+             this.$set(it, 'showMoreFlag', true)
+             this.tempData[index] = null
+           }
+         })
+       },
+       showMoreGoods (item, index) {
+         item.showMoreFlag = !item.showMoreFlag
+         if (item.showMoreFlag) {
+           this.tempData[index] = null
+         } else {
+           this.tempData[index] = item.goods.slice(0, this.threshold)
+         }
+       },
+       changeGoodsStatus (item, index, goodsItem) {
+         this.$confirm('是否要上架此产品?', '提示', {
+           confirmButtonText: '确定',
+           cancelButtonText: '取消',
+           type: 'warning'
+         }).then(() => {
+           axios.post(changeGoodsStatus, qs.stringify({
+             goods_id: goodsItem.goodsId
+           })).then(res => {
+             if (res.data.code === 200) {
+               item.goods.splice(item.goods.indexOf(goodsItem), 1)
+               if (this.tempData[index] && item.goods.length > this.threshold) {
+                 item.showMoreFlag = false
+                 this.tempData[index] = item.goods.slice(0, this.threshold)
+               } else {
+                 item.showMoreFlag = true
+                 this.tempData[index] = null
+               }
+               this.successMsg()
+             } else {
+               this.errorMsg()
+             }
+           })
+         })
+       },
+       deleteGoods (item, index, goodsItem) {
+         this.$confirm('是否要删除此产品?', '提示', {
+           confirmButtonText: '确定',
+           cancelButtonText: '取消',
+           type: 'warning'
+         }).then(() => {
+           axios.post(delGoods, qs.stringify({
+             goods_id: goodsItem.goodsId
+           })).then(res => {
+             if (res.data.code === 200) {
+               item.goods.splice(item.goods.indexOf(goodsItem), 1)
+               if (this.tempData[index] && item.goods.length > this.threshold) {
+                 item.showMoreFlag = false
+                 this.tempData[index] = item.goods.slice(0, this.threshold)
+               } else {
+                 item.showMoreFlag = true
+                 this.tempData[index] = null
+               }
+               this.successMsg()
+             } else {
+               this.errorMsg()
+             }
+           })
+         })
+       },
+       layerOpenWindow ({type, content, area}) {
+         layer.open({
+           type,
+           area,
+           shadeClose: true, //点击遮罩关闭
+           content
+         });
+       },
+       successMsg (msg = '操作成功') {
+         this.$message({
+           type: 'success',
+           message: msg
+         });
+       },
+       errorMsg (msg = '操作失败') {
+         this.$message({
+           type: 'error',
+           message: msg
+         });
+       },
+       dateFormat (dataStr) {
+         var dt = new Date(dataStr * 1000)
+         var y = dt.getFullYear()
+         var m = dt.getMonth() + 1
+         var d = dt.getDate()
+         var hh = dt.getHours()
+         var mm = dt.getMinutes()
+         var ss = dt.getSeconds()
+         return y + '-' + m + '-' + d
+       },
+       handleCurrentChange (page) {
+         this.page = page
+       },
+       onSearch () {
+         this.page = 1
+         this.getData()
+       },
+       showPasswordDialog ({ s_id, s_title }) {
+        axios.post(setPasswordUrl, qs.stringify({
+          scenic_id: s_id
+         })).then(res => {
+          this.passwordItem = res.data
+          this.passwordItem.scenicName = s_title
+          this.dialogFormVisible = true
+         }).catch(error => {
+           console.log(error)
+         })
+       },
+       getData () {
+         this.fullscreenLoading = true
+         axios.post(getScenicList, qs.stringify({
+           page: this.page,
+           scenic_name: this.searchContent
+         })).then(res => {
+           this.fullscreenLoading = false
+           this.tableData = res.data.rows
+           if (this.tableData && this.tableData.length > 0) { 
+             this.total = res.data.total
+             this.initTempData()
+           } else {
+             this.loadingTip = '暂无景区数据'
+           }
+         }).catch(error => {
+           console.log(error);
+           this.loadingTip = '暂无景区数据'
+           this.fullscreenLoading = false
+         })
+       }
+     },
+     mounted () {
+       this.getData()
+     }
+   })
+ </script>
+ </body>
+ </html>
