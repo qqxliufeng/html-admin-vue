@@ -1,7 +1,7 @@
 <!--
  * @Author: your name
  * @Date: 2020-05-26 11:23:45
- * @LastEditTime: 2020-06-03 14:05:29
+ * @LastEditTime: 2020-06-05 15:57:02
  * @LastEditors: Please set LastEditors
  * @Description: In User Settings Edit
  * @FilePath: /small-shop/Users/lf/Desktop/ydk-project/html-admin/edit-scenic-goods.html
@@ -13,8 +13,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>编辑产品</title>
   <link rel="stylesheet" href="__STATIC__/store/css/element-ui.css"></link>
+  <link rel="stylesheet" href="__STATIC__/store/css/quill-snow.css">
   <script src="__STATIC__/store/js/vue.min.js"></script>
   <script src="__STATIC__/store/js/jquery.min.js"></script>
+  <script src="__STATIC__/store/js/quill.js"></script>
+  <script src="__STATIC__/store/js/vue-quill-editor.js" charset="UTF-8"></script>
   <script src="__STATIC__/store/js/element-ui.min.js"></script>
   <script src="__STATIC__/store/js/axios.min.js"></script>
   <script src="__STATIC__/store/js/qs.min.js"></script>
@@ -156,6 +159,11 @@
                 <el-input v-model="goodsInfoModule.form.goodsTitle" placeholder="请输入商品名称（必填）"></el-input>
               </el-col>
             </el-form-item>
+            <el-form-item v-if="categoryId !== 13" label="商品标题">
+              <el-col :span="10">
+                <el-input v-model="goodsInfoModule.form.title" placeholder="请输入商品标题"></el-input>
+              </el-col>
+            </el-form-item>
             <el-form-item label="设备名称">
               <el-col :span="10">
                 <el-input v-model="goodsInfoModule.form.print_name" placeholder="请输入设备名称"></el-input>
@@ -179,6 +187,19 @@
                   <el-radio-button v-for="item in yearCardList" :label="item.value" :key="item.value">{{item.name}}</el-radio-button>
                 </el-radio-group>
               </el-col>
+            </el-form-item>
+            <el-form-item v-if="categoryId !== 13" label="图文详情">
+              <el-col :span="10">
+                <quill-editor
+                  ref="myQuillEditor"
+                  :options="editorOption" 
+                  v-model="goodsInfoModule.form.details"
+                />
+              </el-col>
+              <el-upload class="upload-demo" :action="uploadUrl" :before-upload='beforeUpload' :data="uploadData" :on-success='upScuccess' 
+                ref="upload" style="display:none">
+                <el-button size="small" type="primary" id="imgInput" v-loading.fullscreen.lock="fullscreenLoading" element-loading-text="插入中,请稍候">点击上传</el-button>
+              </el-upload>
             </el-form-item>
           </el-form>
         </el-card>
@@ -321,6 +342,22 @@
               <el-col :span="10">
                 <el-input v-model="moneyModule.form.other"  placeholder="其它说明"></el-input>
               </el-col>
+            </el-form-item>
+            <el-form-item v-if="categoryId === 14"  label="集合地点">
+              <el-row v-for="item in moneyModule.form.assemblingPlaceTemp" :key="item.id" style="margin-bottom: 10px;">
+                <el-col :span="3">
+                  <el-time-picker v-model="item.time" format="HH:mm" value-format="HH:mm" placeholder="请选择时间" style="width: 100%;"></el-time-picker>
+                </el-col>
+                <el-col :span="5" style="margin-left: 10px;">
+                  <el-input v-model="item.site"  placeholder="请输入集合地点"></el-input>
+                </el-col>
+                <el-col v-if="item.showCloseButton" :span="1" style="text-align: center;">
+                  <el-button type="danger" @click.native="removeRouteSite(item)">删除</el-button>
+                </el-col>
+                <el-col v-if="item.showAddButton" :span="1" style="text-align: center;">
+                  <el-button type="primary" @click.native="addRouteSite">添加</el-button>
+                </el-col>
+              </el-row>
             </el-form-item>
           </el-form>
         </el-card>
@@ -542,7 +579,7 @@
         <el-card>
           <div slot="header" class="clearfix module-title">
             <div class="my-flex-box-wrapper" style="justify-content: space-between; align-items: center;">
-              <span>{{menus[4]}}</span>
+              <span>{{categoryId === 13 ? menus[4] : '验票方式'}}</span>
               <el-button type="primary" size="small" @click="save5" v-if="debug">保&nbsp;&nbsp;&nbsp;&nbsp;存</el-button>
             </div>
           </div>
@@ -609,83 +646,85 @@
                 </el-col>
               </el-form-item>
             </div>
-            <el-form-item label="入园方式">
-              <el-col :span="10">
-                <el-radio-group v-model="enterModule.form.parkWays" size="mini">
-                  <el-radio-button v-for="item in parkWaysList" :label="item.value" :key="item.value">{{item.name}}</el-radio-button>
-                </el-radio-group>
-              </el-col>
-            </el-form-item>
-            <div v-if="enterModule.form.parkWays === 0">
-              <el-form-item>
+            <div v-if="categoryId === 13">
+              <el-form-item label="入园方式">
                 <el-col :span="10">
-                  <div class="sub-form-wrapper">
-                    <el-row>
-                      <el-col>
-                        入园时间
-                      </el-col>
-                    </el-row>
-                    <el-row>
-                      <el-col :span="24">
-                        <el-time-picker
-                          is-range
-                          size="small"
-                          v-model="enterModule.form.checkTimeRange"
-                          range-separator="至"
-                          start-placeholder="开始时间"
-                          end-placeholder="结束时间"
-                          format="HH:mm"
-                          placeholder="选择时间范围">
-                        </el-time-picker>
-                      </el-col>
-                    </el-row>
-                  </div>
+                  <el-radio-group v-model="enterModule.form.parkWays" size="mini">
+                    <el-radio-button v-for="item in parkWaysList" :label="item.value" :key="item.value">{{item.name}}</el-radio-button>
+                  </el-radio-group>
                 </el-col>
               </el-form-item>
-            </div>
-            <div v-else>
-              <el-form-item>
-                <el-col :span="10">
-                  <div class="sub-form-wrapper">
-                    <el-row>
-                      <el-col>
-                        换票时间
-                      </el-col>
-                    </el-row>
-                    <el-row>
-                      <el-col :span="24">
-                        <el-time-picker
-                          is-range
-                          size="small"
-                          v-model="enterModule.form.checkTimeRange"
-                          range-separator="至"
-                          start-placeholder="开始时间"
-                          end-placeholder="结束时间"
-                          format="HH:mm"
-                          value-format="timestamp"
-                          placeholder="选择时间范围">
-                        </el-time-picker>
-                      </el-col>
-                    </el-row>
-                  </div>
-                </el-col>
-              </el-form-item>
-              <el-form-item>
-                <el-col :span="10">
-                  <div class="sub-form-wrapper">
-                    <el-row>
-                      <el-col>
-                        换票地址
-                      </el-col>
-                    </el-row>
-                    <el-row>
-                      <el-col :span="24">
-                        <el-input v-model="enterModule.form.parkCheck" size="small" type="textarea" :rows="5" placeholder="请输入换票地址（必填）"></el-input>
-                      </el-col>
-                    </el-row>
-                  </div>
-                </el-col>
-              </el-form-item>
+              <div v-if="enterModule.form.parkWays === 0">
+                <el-form-item>
+                  <el-col :span="10">
+                    <div class="sub-form-wrapper">
+                      <el-row>
+                        <el-col>
+                          入园时间
+                        </el-col>
+                      </el-row>
+                      <el-row>
+                        <el-col :span="24">
+                          <el-time-picker
+                            is-range
+                            size="small"
+                            v-model="enterModule.form.checkTimeRange"
+                            range-separator="至"
+                            start-placeholder="开始时间"
+                            end-placeholder="结束时间"
+                            format="HH:mm"
+                            placeholder="选择时间范围">
+                          </el-time-picker>
+                        </el-col>
+                      </el-row>
+                    </div>
+                  </el-col>
+                </el-form-item>
+              </div>
+              <div v-else>
+                <el-form-item>
+                  <el-col :span="10">
+                    <div class="sub-form-wrapper">
+                      <el-row>
+                        <el-col>
+                          换票时间
+                        </el-col>
+                      </el-row>
+                      <el-row>
+                        <el-col :span="24">
+                          <el-time-picker
+                            is-range
+                            size="small"
+                            v-model="enterModule.form.checkTimeRange"
+                            range-separator="至"
+                            start-placeholder="开始时间"
+                            end-placeholder="结束时间"
+                            format="HH:mm"
+                            value-format="timestamp"
+                            placeholder="选择时间范围">
+                          </el-time-picker>
+                        </el-col>
+                      </el-row>
+                    </div>
+                  </el-col>
+                </el-form-item>
+                <el-form-item>
+                  <el-col :span="10">
+                    <div class="sub-form-wrapper">
+                      <el-row>
+                        <el-col>
+                          换票地址
+                        </el-col>
+                      </el-row>
+                      <el-row>
+                        <el-col :span="24">
+                          <el-input v-model="enterModule.form.parkCheck" size="small" type="textarea" :rows="5" placeholder="请输入换票地址（必填）"></el-input>
+                        </el-col>
+                      </el-row>
+                    </div>
+                  </el-col>
+                </el-form-item>
+              </div>
             </div>
             <el-form-item label="入园凭证">
               <el-col>
@@ -694,23 +733,25 @@
                 </el-checkbox-group>
               </el-col>
             </el-form-item>
-            <el-form-item label="有效证件">
-              <el-col :span="10">
-                <el-input v-model="enterModule.form.other_way" size="small" placeholder="请输入有效证件"></el-input>
-                <el-link :underline="false" type="warning">例如:学生证，校园卡，电子学籍，其中一中</el-link>
-              </el-col>
-            </el-form-item>
-            <el-form-item label="备注">
-              <el-col :span="10">
-                <el-input v-model="enterModule.form.check_time_notes" size="small" placeholder="请输入备注"></el-input>
-                <el-link :underline="false" type="warning">例如:请在此时间内换票，错过换票时间再有效期内隔日再来换票</el-link>
-              </el-col>
-            </el-form-item>
-            <el-form-item label="入园地址">
-              <el-col :span="10">
-                <el-input v-model="enterModule.form.parkDetails" size="small" type="textarea" :rows="5" placeholder="请输入入园地址（必填）"></el-input>
-              </el-col>
-            </el-form-item>
+            <div v-if="categoryId === 13">
+              <el-form-item label="有效证件">
+                <el-col :span="10">
+                  <el-input v-model="enterModule.form.other_way" size="small" placeholder="请输入有效证件"></el-input>
+                  <el-link :underline="false" type="warning">例如:学生证，校园卡，电子学籍，其中一中</el-link>
+                </el-col>
+              </el-form-item>
+              <el-form-item label="备注">
+                <el-col :span="10">
+                  <el-input v-model="enterModule.form.check_time_notes" size="small" placeholder="请输入备注"></el-input>
+                  <el-link :underline="false" type="warning">例如:请在此时间内换票，错过换票时间再有效期内隔日再来换票</el-link>
+                </el-col>
+              </el-form-item>
+              <el-form-item label="入园地址">
+                <el-col :span="10">
+                  <el-input v-model="enterModule.form.parkDetails" size="small" type="textarea" :rows="5" placeholder="请输入入园地址（必填）"></el-input>
+                </el-col>
+              </el-form-item>
+            </div>
           </el-form>
         </el-card>
       </div>
@@ -1180,19 +1221,20 @@
     </div>
   </div>
 <script>
+  Vue.use(window.VueQuillEditor)
   axios.defaults.headers.post['Content-Type'] = 'application/x-www-form-urlencoded'
   var qs = Qs
   var baseUrl = 'http://192.168.0.110' // 基本的URL
-  var debug = false
+  var debug = true
   var loadGoodsTypesUrl = (debug ? baseUrl : '') + '/store/goods/goods_list/goodsType' // 加载商品分类URL
   var editGoodsInfoUrl = (debug ? baseUrl : '') + '/store/goods/goods_list/editGoods' // 提交数据URL
   var getGoodsInfo = (debug ? baseUrl : '') + '/store/goods/goods_list/goodsInfo' // 获取商品信息
+  var uploadImage = (debug ? baseUrl : '') + '/store/ajax/upload' // 获取商品信息
   /** goods action urls **/
   var app = new Vue({
     el: '#app',
     data () {
       return {
-        debug: false,
         menus: ['商品信息', '销售方案', '费用说明', '购买限制', '入园方式', '验证设置', '退改设置', '短信设置', '上下架设置'],
         rangeHeight: [],
         paddingTop: 10,
@@ -1251,7 +1293,33 @@
         upDownModule: {
           form: goodsInfoUpDownFormData,
           checkRules: goodsInfoUpDownCheckRules
-        }
+        },
+        /**  不是门票的其它数据  **/
+        categoryId: 0,
+        editorOption: {
+          modules:{
+            toolbar:[
+              ['bold', 'italic', 'underline', 'strike'],    //加粗，斜体，下划线，删除线
+              ['blockquote', 'code-block'],     //引用，代码块
+              [{ 'header': 1 }, { 'header': 2 }],        // 标题，键值对的形式；1、2表示字体大小
+              [{ 'list': 'ordered'}, { 'list': 'bullet' }],     //列表
+              [{ 'script': 'sub'}, { 'script': 'super' }],   // 上下标
+              [{ 'indent': '-1'}, { 'indent': '+1' }],     // 缩进
+              [{ 'size': ['small', false, 'large', 'huge'] }], // 字体大小
+              [{ 'header': [1, 2, 3, 4, 5, 6, false] }],     //几级标题
+              [{ 'color': [] }, { 'background': [] }],     // 字体颜色，字体背景颜色
+              [{ 'align': [] }],    //对齐方式
+              ['clean'],    //清除字体样式
+              ['image']    //上传图片、上传视频
+            ]
+          },
+          theme:'snow'
+        },
+        uploadUrl: uploadImage,
+        addRange: [],
+        uploadData: {},
+        photoUrl: '',
+        uploadType: ''
       }
     },
     computed: {
@@ -1262,6 +1330,8 @@
           before: this.buyLimitModule.form.before,
           custom: this.buyLimitModule.form.is_custom,
           
+          siteLength: this.moneyModule.form.assemblingPlaceTemp.length,
+
           tourists: this.enterModule.form.tourists,
           parkWays: this.enterModule.form.parkWays,
 
@@ -1368,13 +1438,13 @@
         console.log(this.saleSchemeModule.checkRules.check())
       },
       save3() {
-        console.log(this.moneyModule.checkRules.check())
+        console.log(this.moneyModule.checkRules.check(this.categoryId))
       },
       save4() {
         console.log(this.buyLimitModule.checkRules.check())
       },
       save5() {
-        console.log(this.enterModule.checkRules.check())
+        console.log(this.enterModule.checkRules.check(this.categoryId))
       },
       save6() {
         console.log(this.verifyModule.checkRules.check());
@@ -1396,7 +1466,7 @@
           this.showErrorMsg(salesSchemeResult.message)
           return
         }
-        const moneyResult = this.moneyModule.checkRules.check()
+        const moneyResult = this.moneyModule.checkRules.check(this.categoryId)
         if (moneyResult instanceof Error) {
           this.showErrorMsg(moneyResult.message)
           return
@@ -1406,7 +1476,7 @@
           this.showErrorMsg(buyLimitResult.message)
           return
         }
-        const enterResult = this.enterModule.checkRules.check()
+        const enterResult = this.enterModule.checkRules.check(this.categoryId)
         if (enterResult instanceof Error) {
           this.showErrorMsg(enterResult.message)
           return
@@ -1451,7 +1521,9 @@
              message: '恭喜，产品修改成功',
              type: 'success'
            })
-           window.location.href = this.goodsStatus === 0 ? '/store/goods/goods_list/un_shelve' : '/store/goods/goods_list'
+           if (!debug) {
+            window.location.href = this.goodsStatus === 0 ? '/store/goods/goods_list/un_shelve' : '/store/goods/goods_list'
+           }
          }).catch(error => {
            this.fullscreenLoading = false
            this.$message.error('产品信息修改失败');
@@ -1462,6 +1534,11 @@
           goods_id: debug ? 1 : {$goods_id} // 通过dubug开关设置是否需要开启php代码
          })).then(res => {
           const data = res.data
+          this.categoryId = data.categoryId
+          if (this.categoryId !== 13) {
+            this.$refs.myQuillEditor.quill.getModule('toolbar').addHandler('image', this.imgHandler)
+            this.menus[4] = this.categoryId === 13 ? '入园方式' : '验票方式'
+          }
           // 加载分类
           loadGoodsTypes(loadGoodsTypesUrl, qs.stringify({category_id: data.categoryId}))
           this.goodsInfoModule.form.initData({
@@ -1491,7 +1568,8 @@
             feesInclude: data.feesInclude,
             feesNotInclude: data.feesNotInclude,
             invoiceExplain: data.invoiceExplain,
-            other: data.other
+            other: data.other,
+            sites: data.assembling_place
           })
           this.buyLimitModule.form.initData({
             buyTimes: data.buyTimes,
@@ -1595,6 +1673,36 @@
           this.inputSpanObj.salesPrice = 4
           this.inputSpanObj.retailPrice = 4
           this.inputSpanObj.dayStock = 4
+        }
+      },
+      imgHandler (state) {
+        this.addRange = this.$refs.myQuillEditor.quill.getSelection()
+        if (state) {
+          let fileInput = document.getElementById('imgInput')
+          fileInput.click() // 加一个触发事件
+        }
+        this.uploadType = 'image'
+        // this.$refs.myQuillEditor.quill.insertEmbed(0, 'image', 'https://ss3.bdstatic.com/70cFv8Sh_Q1YnxGkpoWK1HF6hhy/it/u=2534506313,1688529724&fm=26&gp=0.jpg', Quill.sources.USER)   // 调用编辑器的 insertEmbed 方法，插入URL
+      },
+      beforeUpload () {
+        return true
+      },
+      upScuccess (e, file, fileList) {
+        if (e.code === 0) {
+          this.$message.error(e.msg)
+        } else {
+          let url = ''
+          if (this.uploadType === 'image') {    // 获得文件上传后的URL地址
+            url = e.data.url
+          }
+          if (url != null && url.length > 0) {  // 将文件上传后的URL地址插入到编辑器文本中
+            let value = url
+            this.addRange = this.$refs.myQuillEditor.quill.getSelection()
+            this.$refs.myQuillEditor.quill.insertEmbed(this.addRange !== null ? this.addRange.index : 0, this.uploadType, (debug ? baseUrl : '') + value, Quill.sources.USER)   // 调用编辑器的 insertEmbed 方法，插入URL
+          } else {
+            this.$message.error('插入失败')
+          }
+          this.$refs['upload'].clearFiles()    // 插入成功后清除input的内容
         }
       }
     },

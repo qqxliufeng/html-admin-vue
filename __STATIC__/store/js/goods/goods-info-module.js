@@ -1,7 +1,7 @@
 /*
  * @Author: your name
  * @Date: 2020-05-21 13:57:42
- * @LastEditTime: 2020-06-03 09:48:05
+ * @LastEditTime: 2020-06-04 14:19:10
  * @LastEditors: Please set LastEditors
  * @Description: In User Settings Edit
  * @FilePath: /small-shop/Users/lf/Desktop/ydk-project/html-admin/js/goodsInfoModule.js
@@ -31,6 +31,8 @@ const goodsInfoFormData = {
   sellerId: 1,
   sellerName: '',
   goodsTitle: '',
+  title: '',
+  details: '',
   print_name: '',
   goodsTypeId: '',
   year_card: 0,

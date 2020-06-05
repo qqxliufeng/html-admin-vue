@@ -1,7 +1,7 @@
 /*
  * @Author: your name
  * @Date: 2020-05-21 14:55:01
- * @LastEditTime: 2020-05-29 10:01:46
+ * @LastEditTime: 2020-06-04 17:16:22
  * @LastEditors: Please set LastEditors
  * @Description: In User Settings Edit
  * @FilePath: /small-shop/Users/lf/Desktop/ydk-project/html-admin/js/goods-info-money-module.js
@@ -14,6 +14,7 @@ const goodsInfoMoneyFormData = {
   feesNotInclude: '',
   invoiceExplain: '',
   other: '',
+  assembling_place: [],
   initData (tempData) {
     this.for_people = tempData.for_people
     this.feesInclude = tempData.feesInclude

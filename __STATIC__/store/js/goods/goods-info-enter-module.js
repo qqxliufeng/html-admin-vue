@@ -122,7 +122,7 @@ const goodsInfoEnterFormData = {
 }
 // 模块信息校验规则
 const goodsInfoEnterCheckRules = {
-  check: function() {
+  check: function(categoryId = 13) {
     if (goodsInfoEnterFormData.tourists !== 0) {
       if (goodsInfoEnterFormData.touristsInfoTemp.length === 0) {
         return new Error('请至少选择一种  ' + enterModulesName + ' -> 所需用户信息')
@@ -131,31 +131,32 @@ const goodsInfoEnterCheckRules = {
         return new Error('请输入  ' + enterModulesName + ' -> 限制身份证号')
       }
     }
-    if (goodsInfoEnterFormData.parkWays === 0) {
-      if (goodsInfoEnterFormData.checkTimeRange.length === 0) {
-        return new Error('请选择  ' + enterModulesName + ' -> 入园时间')
+    if (categoryId === 13) {
+      if (goodsInfoEnterFormData.parkWays === 0) {
+        if (goodsInfoEnterFormData.checkTimeRange.length === 0) {
+          return new Error('请选择  ' + enterModulesName + ' -> 入园时间')
+        }
+      } else {
+        if (goodsInfoEnterFormData.checkTimeRange.length === 0) {
+          return new Error('请选择  ' + enterModulesName + ' -> 换票时间')
+        }
+        if (!goodsInfoEnterFormData.parkCheck) {
+          return new Error('请输入  ' + enterModulesName + ' -> 换票地址')
+        }
       }
-    } else {
-      if (goodsInfoEnterFormData.checkTimeRange.length === 0) {
-        return new Error('请选择  ' + enterModulesName + ' -> 换票时间')
+      if (goodsInfoEnterFormData.parkProveTemp.length === 0) {
+        return new Error('请至少选择一种  ' + enterModulesName + ' -> 入园凭证')
       }
-      if (!goodsInfoEnterFormData.parkCheck) {
-        return new Error('请输入  ' + enterModulesName + ' -> 换票地址')
+      if (!goodsInfoEnterFormData.parkDetails) {
+        return new Error('请输入  ' + enterModulesName + ' -> 入园地址')
       }
+      if (goodsInfoEnterFormData.checkTimeRange.length > 0) {
+        goodsInfoEnterFormData.parkCheckStartTime = goodsInfoEnterFormData.checkTimeRange[0].getTime() / 1000
+        goodsInfoEnterFormData.parkCheckEndTime = goodsInfoEnterFormData.checkTimeRange[1].getTime() / 1000
+      }
+      goodsInfoEnterFormData.touristsInfo = goodsInfoEnterFormData.touristsInfoTemp.join(',')
+      goodsInfoEnterFormData.parkProve = goodsInfoEnterFormData.parkProveTemp.join(',')
     }
-    if (goodsInfoEnterFormData.parkProveTemp.length === 0) {
-      return new Error('请至少选择一种  ' + enterModulesName + ' -> 入园凭证')
-    }
-    if (!goodsInfoEnterFormData.parkDetails) {
-      return new Error('请输入  ' + enterModulesName + ' -> 入园地址')
-    }
-    if (goodsInfoEnterFormData.checkTimeRange.length > 0) {
-      goodsInfoEnterFormData.parkCheckStartTime = goodsInfoEnterFormData.checkTimeRange[0].getTime() / 1000
-      goodsInfoEnterFormData.parkCheckEndTime = goodsInfoEnterFormData.checkTimeRange[1].getTime() / 1000
-    }
-    goodsInfoEnterFormData.touristsInfo = goodsInfoEnterFormData.touristsInfoTemp.join(',')
-    goodsInfoEnterFormData.parkProve = goodsInfoEnterFormData.parkProveTemp.join(',')
-    // return goodsInfoEnterFormData
     return JSON.parse(JSON.stringify(goodsInfoEnterFormData, function (key, value) {
       if (typeof value === 'function') {
         return undefined
