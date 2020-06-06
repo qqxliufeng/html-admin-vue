@@ -1,7 +1,7 @@
 /*
  * @Author: your name
  * @Date: 2020-05-21 13:57:42
- * @LastEditTime: 2020-06-04 14:19:10
+ * @LastEditTime: 2020-06-06 14:32:45
  * @LastEditors: Please set LastEditors
  * @Description: In User Settings Edit
  * @FilePath: /small-shop/Users/lf/Desktop/ydk-project/html-admin/js/goodsInfoModule.js
@@ -41,9 +41,11 @@ const goodsInfoFormData = {
     this.sellerId = tempData.sellerId
     this.sellerName = tempData.sellerName
     this.goodsTitle = tempData.title
+    this.title = tempData.subTitle
     this.print_name = tempData.printName
     this.goodsTypeId = tempData.goodsTypeId
     this.year_card = tempData.year_card
+    this.details = tempData.details
   }
 }
 // 模块信息校验规则
@@ -51,9 +53,6 @@ const goodsInfoModulecheckRules = {
   check: function() {
     if (!goodsInfoFormData.goodsTitle) {
       return new Error('请输入  ' + modulesName + ' -> 商品名称')
-    }
-    if (!goodsInfoFormData.print_name) {
-      return new Error('请输入  ' + modulesName + ' -> 设备名称')
     }
     return JSON.parse(JSON.stringify(goodsInfoFormData, function (key, value) {
       if (typeof value === 'function') {
